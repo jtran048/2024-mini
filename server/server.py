@@ -62,6 +62,21 @@ class RequestHandler(BaseHTTPRequestHandler):
         try:
             content = json.loads(content)
         except json.JSONDecodeError:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(b'{"error": "Invalid JSON"}')
+            return
+
+        with open("db/"+content['email'],'w') as fp:
+            print("avg,min,max",file=fp)
+            print(
+                ",".join([content['avg'],content['min'],content['max']),
+                file=fp
+            )
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b'OK')
+            return
 
 server = HTTPServer(
     ('', 80), 
