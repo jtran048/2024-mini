@@ -56,13 +56,6 @@ class RequestHandler(BaseHTTPRequestHandler):
         else:
             self.serve_404() 
 
-    def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        content = self.rfile.read(content_length)
-        try:
-            content = json.loads(content)
-        except json.JSONDecodeError:
-
 server = HTTPServer(
     ('', 80), 
     RequestHandler
