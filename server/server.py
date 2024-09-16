@@ -70,7 +70,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         with open("db/"+content['email'],'w') as fp:
             print("avg,min,max",file=fp)
             print(
-                ",".join([content['avg'],content['min'],content['max']),
+                ",".join([content['avg'],content['min'],content['max']]),
                 file=fp
             )
             self.send_response(200)
