@@ -6,11 +6,13 @@ from machine import Pin
 import time
 import random
 import json
+import requests
 
 
-N: int = 3
+N: int = 10
 sample_ms = 10.0
 on_ms = 500
+user_email = "vraiti@bu.edu"
 
 
 def random_time_interval(tmin: float, tmax: float) -> float:
@@ -54,12 +56,22 @@ def scorer(t: list[int | None]) -> None:
 
     print(t_good)
 
+    if t_good:
+            avg = sum(t_good) / len(t_good)
+            min_response = min(t_good)
+            max_response = max(t_good)
+    else: 
+        avg = min_response = max_response = None
+
     # add key, value to this dict to store the minimum, maximum, average response time
     # and score (non-misses / total flashes) i.e. the score a floating point number
     # is in range [0..1]
-    data = {}
-
-    # %% make dynamic filename and write JSON
+    data = {
+        "email": user_email,
+        "avg": avg,
+        "min": min_response,
+        "max": max_response,
+    }
 
     now: tuple[int] = time.localtime()
 
@@ -70,6 +82,11 @@ def scorer(t: list[int | None]) -> None:
 
     write_json(filename, data)
 
+def send_data(score_data: dict):
+    database_api_url = "http://3.70.154.114/pico-data/"
+    response = requests.post(database_api_url, json=score_data)
+    print(f"Response Status Code: {response.status_code}")
+    print(f"Response Text: {response.text}")
 
 if __name__ == "__main__":
     # using "if __name__" allows us to reuse functions in other script files
@@ -99,4 +116,6 @@ if __name__ == "__main__":
 
     blinker(5, led)
 
-    scorer(t)
+    score_data = scorer(t)
+
+    send_data(score_data)
