@@ -6,7 +6,7 @@ from machine import Pin
 import time
 import random
 import json
-import requests
+import urequests
 
 
 N: int = 10
@@ -116,9 +116,5 @@ if __name__ == "__main__":
     headers = {
             'Content-Type': 'application/json'
     }
-
-    conn = http.client.HTTPConnection("3.70.154.114")
-    conn.request("POST","/",body=score_data, headers=headers)
-    response = conn.getresponse()
-    print(response.status, response.reason)
-    conn.close()
+    json = json.dumps(score_data)
+    urequest.post("3.70.154.144",json=json)
