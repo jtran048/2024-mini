@@ -82,11 +82,6 @@ def scorer(t: list[int | None]) -> None:
 
     write_json(filename, data)
 
-def send_data(score_data: dict):
-    database_api_url = "http://3.70.154.114/pico-data/"
-    response = requests.post(database_api_url, json=score_data)
-    print(f"Response Status Code: {response.status_code}")
-    print(f"Response Text: {response.text}")
 
 if __name__ == "__main__":
     # using "if __name__" allows us to reuse functions in other script files
@@ -116,6 +111,14 @@ if __name__ == "__main__":
 
     blinker(5, led)
 
-    score_data = scorer(t)
+    score_data = json.dumps(scorer(t))
 
-    send_data(score_data)
+    headers = {
+            'Content-Type': 'application/json'
+    }
+
+    conn = http.client.HTTPConnection("3.70.154.114")
+    conn.request("POST","/",body=score_data, headers=headers)
+    response = conn.getresponse()
+    print(response.status, response.reason)
+    conn.close()
