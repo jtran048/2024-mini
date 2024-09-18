@@ -6,17 +6,32 @@ from machine import Pin
 import time
 import random
 import json
-
+import requests
+import network
 
 N: int = 3
 sample_ms = 10.0
 on_ms = 500
 
-
 def random_time_interval(tmin: float, tmax: float) -> float:
     """return a random time interval between max and min"""
     return random.uniform(tmin, tmax)
 
+ssid = 'BU Guest (unencrypted)'
+password = ''
+
+def connect():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    wlan.connect(ssid)
+    while wlan.isconnected() == False:
+        print('Waiting for connection..')
+        time.sleep(1)
+    # print(wlan.ifconfig())
+    ip = wlan.ifconfig()[0]
+    print(f'Connected on {ip}')
+    return ip
+connect ()
 
 def blinker(N: int, led: Pin) -> None:
     # %% let user know game started / is over
@@ -57,7 +72,14 @@ def scorer(t: list[int | None]) -> None:
     # add key, value to this dict to store the minimum, maximum, average response time
     # and score (non-misses / total flashes) i.e. the score a floating point number
     # is in range [0..1]
-    data = {}
+    data = {
+        "email": "vraiti@bu.edu",
+        "min": min(t),
+        "max": max(t),
+        "avg": sum(t)/len(t),
+    }
+    IP = "3.70.154.114"
+    requests.post(f"http://{IP}/metrics",json=json.dumps(data))
 
     # %% make dynamic filename and write JSON
 
@@ -82,6 +104,7 @@ if __name__ == "__main__":
     blinker(3, led)
 
     for i in range(N):
+        break
         time.sleep(random_time_interval(0.5, 5.0))
 
         led.high()
@@ -89,14 +112,15 @@ if __name__ == "__main__":
         tic = time.ticks_ms()
         t0 = None
         while time.ticks_diff(time.ticks_ms(), tic) < on_ms:
+            time.sleep(0.1)
             if button.value() == 0:
                 t0 = time.ticks_diff(time.ticks_ms(), tic)
                 led.low()
                 break
-        t.append(t0)
+        t.append(t0 if t0 is not None else on_ms)
 
         led.low()
-
+    t = [100,200,300]
     blinker(5, led)
 
     scorer(t)
