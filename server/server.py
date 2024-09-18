@@ -1,5 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import json
 import os
+import ast
 
 class RequestHandler(BaseHTTPRequestHandler):
     def serve_index(self):
@@ -12,7 +14,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def serve_table(self):
         email = self.path.split('?')[-1]
         try:
-            table = [line.split(",") for line in open(f"db/{email}.csv").readlines()]
+            table = [line.split(",") for line in open(f"db/{email}").readlines()]
         except FileNotFoundError:
             self.serve_404()
             return
@@ -67,10 +69,13 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(b'{"error": "Invalid JSON"}')
             return
 
+        content = ast.literal_eval(content)
+
         with open("db/"+content['email'],'w') as fp:
             print("avg,min,max",file=fp)
+            vals=[str(content[k]) for k in ['avg','min','max']]
             print(
-                ",".join([content['avg'],content['min'],content['max']]),
+                ",".join(vals),
                 file=fp
             )
             self.send_response(200)
