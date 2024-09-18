@@ -21,7 +21,7 @@ def random_time_interval(tmin: float, tmax: float) -> float:
 
 ssid = 'BU Guest (unencrypted)'
 password = ''
-
+# made by user tan on SO: https://stackoverflow.com/questions/75991036/oserror-6-when-making-simple-api-call-in-micropython
 def connect():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
