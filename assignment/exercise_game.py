@@ -9,9 +9,11 @@ import json
 import requests
 import network
 
-N: int = 3
+
+N: int = 10
 sample_ms = 10.0
 on_ms = 500
+user_email = "vraiti@bu.edu"
 
 def random_time_interval(tmin: float, tmax: float) -> float:
     """return a random time interval between max and min"""
@@ -69,6 +71,13 @@ def scorer(t: list[int | None]) -> None:
 
     print(t_good)
 
+    if t_good:
+            avg = sum(t_good) / len(t_good)
+            min_response = min(t_good)
+            max_response = max(t_good)
+    else: 
+        avg = min_response = max_response = None
+
     # add key, value to this dict to store the minimum, maximum, average response time
     # and score (non-misses / total flashes) i.e. the score a floating point number
     # is in range [0..1]
@@ -82,6 +91,7 @@ def scorer(t: list[int | None]) -> None:
     requests.post(f"http://{IP}/metrics",json=json.dumps(data))
 
     # %% make dynamic filename and write JSON
+
 
     now: tuple[int] = time.localtime()
 
@@ -104,7 +114,6 @@ if __name__ == "__main__":
     blinker(3, led)
 
     for i in range(N):
-        break
         time.sleep(random_time_interval(0.5, 5.0))
 
         led.high()
@@ -120,7 +129,11 @@ if __name__ == "__main__":
         t.append(t0 if t0 is not None else on_ms)
 
         led.low()
-    t = [100,200,300]
     blinker(5, led)
 
-    scorer(t)
+    score_data = json.dumps(scorer(t))
+
+    headers = {
+            'Content-Type': 'application/json'
+    }
+    json = json.dumps(score_data)
